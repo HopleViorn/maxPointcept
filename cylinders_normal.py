@@ -69,7 +69,7 @@ def generate_random_translation_rotation_matrix():
     
     return translation, rotation_matrix
 
-def generate_random_cylinder_with_points(radius = 1, height = 1, points_density=1000):
+def generate_random_cylinder_with_points(radius = 1, height = 1, points_density=400):
 
     points_num = int(points_density * radius * height)
     
@@ -123,7 +123,7 @@ from tqdm import tqdm
 if __name__=='__main__':
 
     num=sys.argv[1]
-    for j in tqdm(range(0, 50)):
+    for j in tqdm(range(0, 1)):
         # point_clouds, instance_labels = save_point_clouds_with_labels_as_numpy()
         dir_path = f"data/cylinders_normal/Area_{int(num)+1}/scene_{j}"
         if not os.path.exists(dir_path):

@@ -142,6 +142,7 @@ class Trainer(TrainerBase):
         self.scheduler = self.build_scheduler()
         self.scaler = self.build_scaler()
         self.logger.info("=> Building hooks ...")
+        self.logger.info(f"=> {self.cfg.hooks} ...")
         self.register_hooks(self.cfg.hooks)
 
     def train(self):

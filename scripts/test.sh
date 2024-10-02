@@ -9,7 +9,7 @@ DATASET=scannet
 CONFIG="None"
 EXP_NAME=debug
 WEIGHT=model_best
-GPU=None
+GPU=1
 
 while getopts "p:d:c:n:w:g:" opt; do
   case $opt in

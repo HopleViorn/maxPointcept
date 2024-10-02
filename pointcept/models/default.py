@@ -65,7 +65,7 @@ class Predictor(nn.Module):
         if self.training:
             return dict(loss=loss)
         else:
-            return dict(loss = loss, feat_logits=feat_logits)
+            return dict(loss = loss, feat_logits=feat_logits, coord = input_dict["coord"])
 
         # # train
         # if self.training:

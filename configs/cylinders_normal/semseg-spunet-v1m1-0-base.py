@@ -27,6 +27,26 @@ scheduler = dict(type="PolyLR")
 dataset_type = "S3DISDataset"
 data_root = "data/cylinders_normal"
 
+    # # dict(type="CheckpointLoader"),
+    # # dict(type="IterationTimer", warmup_iter=2),
+    # # dict(type="InformationWriter"),
+    # dict(type="PredictorEvaluator"),
+    # # dict(type="CheckpointSaver", save_freq=None),
+    # # dict(type="PreciseEvaluator", test_last=False),
+
+
+hooks = [
+    dict(type="CheckpointLoader", keywords="module.", replacement="module."),
+    dict(type="IterationTimer", warmup_iter=2),
+    dict(type="InformationWriter"),
+    dict(
+        type="PredictorEvaluator",
+    ),
+    dict(type="CheckpointSaver", save_freq=None),
+]
+
+test = dict(type="PredictorTester")
+
 data = dict(
     # num_classes=13,
     # ignore_index=-1,
@@ -166,3 +186,4 @@ data = dict(
         ),
     ),
 )
+
