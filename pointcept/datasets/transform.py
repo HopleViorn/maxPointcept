@@ -36,6 +36,8 @@ class Collect(object):
         self.kwargs = kwargs
 
     def __call__(self, data_dict):
+        # print(f"keys: {self.keys}\n{self.kwargs.items()}")
+        # print(type(data_dict))
         data = dict()
         if isinstance(self.keys, str):
             self.keys = [self.keys]
@@ -48,6 +50,31 @@ class Collect(object):
             assert isinstance(keys, Sequence)
             data[name] = torch.cat([data_dict[key].float() for key in keys], dim=1)
         return data
+
+
+@TRANSFORMS.register_module()
+class RandomSample(object):
+    def __init__(self, npoint=40000, mode="train"):
+        self.npoint = npoint
+        self.mode = mode
+    def __call__(self, data_dict):
+        assert "coord" in data_dict.keys()
+        # print(f"RandomSample {type(data_dict)}")
+        shape = data_dict["coord"].shape[0]
+        if self.mode == "train":
+            if shape > self.npoint:
+                idx_sample = np.random.choice(shape, self.npoint, replace=False)
+            else:
+                idx_sample = np.random.choice(shape, self.npoint, replace=True)
+            
+            if "coord" in data_dict.keys():
+                data_dict["coord"] = data_dict["coord"][idx_sample]
+            if "color" in data_dict.keys():
+                data_dict["color"] = data_dict["color"][idx_sample]
+            if "segment" in data_dict.keys():
+                data_dict["segment"] = data_dict["segment"][idx_sample]
+        
+        return data_dict
 
 
 @TRANSFORMS.register_module()
@@ -71,6 +98,7 @@ class Copy(object):
 @TRANSFORMS.register_module()
 class ToTensor(object):
     def __call__(self, data):
+        # print(f"ToTensor {type(data)}")
         if isinstance(data, torch.Tensor):
             return data
         elif isinstance(data, str):
@@ -112,6 +140,7 @@ class Add(object):
 @TRANSFORMS.register_module()
 class NormalizeColor(object):
     def __call__(self, data_dict):
+        # print(f"NormalizeColor {type(data_dict)}")
         if "color" in data_dict.keys():
             data_dict["color"] = data_dict["color"] / 127.5 - 1
         return data_dict
@@ -144,6 +173,7 @@ class CenterShift(object):
         self.apply_z = apply_z
 
     def __call__(self, data_dict):
+        # print(type(data_dict))
         if "coord" in data_dict.keys():
             x_min, y_min, z_min = data_dict["coord"].min(axis=0)
             x_max, y_max, _ = data_dict["coord"].max(axis=0)
@@ -1144,5 +1174,8 @@ class Compose(object):
 
     def __call__(self, data_dict):
         for t in self.transforms:
+            # print(type(data_dict))
             data_dict = t(data_dict)
+            # print(t)
+            # print(f"Compose {type(data_dict)}")
         return data_dict

@@ -18,6 +18,7 @@ except ImportError:
 from pointcept.models.utils import offset2batch, batch2offset
 
 from pointcept.models.builder import MODELS, build_model
+from pointcept.models.utils.structure import Point
 
 
 @MODELS.register_module("PG-v1m1")
@@ -64,7 +65,11 @@ class PointGroup(nn.Module):
         instance_centroid = data_dict["instance_centroid"]
         offset = data_dict["offset"]
 
-        feat = self.backbone(data_dict)
+        point = self.backbone(data_dict)
+        if isinstance(point, Point):
+            feat = point.feat
+        else:
+            feat = point
         bias_pred = self.bias_head(feat)
         logit_pred = self.seg_head(feat)
 

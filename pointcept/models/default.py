@@ -4,6 +4,7 @@ import torch_scatter
 from pointcept.models.losses import build_criteria
 from pointcept.models.utils.structure import Point
 from .builder import MODELS, build_model
+import torch
 
 
 @MODELS.register_module()
@@ -30,6 +31,53 @@ class DefaultSegmentor(nn.Module):
         # test
         else:
             return dict(seg_logits=seg_logits)
+
+@MODELS.register_module()
+class Predictor(nn.Module):
+    def __init__(self, backbone=None, criteria=None):
+        super().__init__()
+        self.backbone = build_model(backbone)
+        # self.criteria = build_criteria(criteria)
+
+    def forward(self, input_dict):
+        if "condition" in input_dict.keys():
+            # PPT (https://arxiv.org/abs/2308.09718)
+            # currently, only support one batch one condition
+            input_dict["condition"] = input_dict["condition"][0]
+        feat_logits = self.backbone(input_dict)
+        # print(feat_logits.shape)
+        # print(input_dict["normal"].shape)
+        def L1_loss(pred, target):
+            return torch.mean(torch.abs(pred - target))
+        def cosine_simility(pred, target):
+            return torch.mean(torch.nn.functional.cosine_similarity(pred, target, dim=-1))
+
+        pred, target = feat_logits, input_dict["normal"]
+
+        l1_loss = L1_loss(pred,target)
+        cos_loss = cosine_simility(pred,target)
+        print("l1",l1_loss.shape)
+        print("cos",cos_loss.shape)
+
+        loss = L1_loss(pred,target) + cosine_simility(pred,target)
+        print(loss)
+        print(loss.shape)
+        if self.training:
+            return dict(loss=loss)
+        else:
+            return dict(loss = loss, feat_logits=feat_logits)
+
+        # # train
+        # if self.training:
+        #     loss = self.criteria(seg_logits, input_dict["normal"])
+        #     return dict(loss=loss)
+        # # eval
+        # elif "segment" in input_dict.keys():
+        #     loss = self.criteria(seg_logits, input_dict["normal"])
+        #     return dict(loss=loss, seg_logits=seg_logits)
+        # # test
+        # else:
+        #     return dict(seg_logits=seg_logits)
 
 
 @MODELS.register_module()

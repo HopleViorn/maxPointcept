@@ -19,7 +19,6 @@ def main_worker(cfg):
     trainer = TRAINERS.build(dict(type=cfg.train.type, cfg=cfg))
     trainer.train()
 
-
 def main():
     args = default_argument_parser().parse_args()
     cfg = default_config_parser(args.config_file, args.options)

@@ -15,6 +15,9 @@ from .semantic_kitti import SemanticKITTIDataset
 from .nuscenes import NuScenesDataset
 from .waymo import WaymoDataset
 
+# factory scene
+from .factory import FactoryDataset
+from .pcat import PCatDataset
 # object
 from .modelnet import ModelNetDataset
 from .shapenet_part import ShapeNetPartDataset

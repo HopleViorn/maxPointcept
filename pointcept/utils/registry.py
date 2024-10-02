@@ -17,6 +17,7 @@ def build_from_cfg(cfg, registry, default_args=None):
     Returns:
         object: The constructed object.
     """
+    # print("Here is the test",cfg)
     if not isinstance(cfg, dict):
         raise TypeError(f"cfg must be a dict, but got {type(cfg)}")
     if "type" not in cfg:

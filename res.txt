@@ -1,0 +1,23 @@
+Train Result:
+    mIoU/mAcc/allAcc 0.7544/0.8273/0.9281
+    Class_0 - others Result: iou/accuracy 0.5715/0.7603
+    Class_1 - pipe Result: iou/accuracy 0.8416/0.9133
+    Class_2 - piperack Result: iou/accuracy 0.5468/0.5606
+    Class_3 - tank Result: iou/accuracy 0.9260/0.9539
+    Class_4 - steel Result: iou/accuracy 0.8864/0.9482
+
+Val Result:
+    mIoU/mAcc/allAcc 0.6163/0.7097/0.8705
+    Class_0 - others Result: iou/accuracy 0.3397/0.5394
+    Class_1 - pipe Result: iou/accuracy 0.7444/0.8440
+    Class_2 - piperack Result: iou/accuracy 0.3538/0.3611
+    Class_3 - tank Result: iou/accuracy 0.8290/0.8944
+    Class_4 - steel Result: iou/accuracy 0.8148/0.9098
+
+Test Result:
+    mIoU/mAcc/allAcc 0.4916/0.6078/0.8584
+    Class_0 - others Result: iou/accuracy 0.1160/0.4550
+    Class_1 - pipe Result: iou/accuracy 0.7135/0.8355
+    Class_2 - piperack Result: iou/accuracy 0.0000/0.0000
+    Class_3 - tank Result: iou/accuracy 0.8341/0.8756
+    Class_4 - steel Result: iou/accuracy 0.7945/0.8728
