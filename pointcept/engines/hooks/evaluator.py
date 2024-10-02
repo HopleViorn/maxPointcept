@@ -119,14 +119,19 @@ class PredictorEvaluator(HookBase):
                 output_dict = self.trainer.model(input_dict)
             normal = output_dict["feat_logits"].detach().cpu().numpy()
             coord = output_dict["coord"].detach().cpu().numpy()
-            coord = coord - np.mean(coord, axis=0)
+            gt = output_dict["normal"].detach().cpu().numpy()
+            # print(normal)
+            # coord = coord - np.mean(coord, axis=0)
+
             loss = output_dict["loss"]
             print(f'loss:{loss}')
             v = viz.Visualizer()
-            v.add_points('coord', coord, normal)
-            v.add_lines('normals', coord, coord + normal, visible=True)
-            v.add_points('predict', coord+normal, np.repeat([[255,0,0]], coord.shape[0],axis=0), visible=True)
-            v.save('visualization/example')
+            v.add_points('coord', coord)
+            v.add_points('predict +', coord + normal, np.repeat([[255,0,0]], coord.shape[0],axis=0), visible=True)
+            v.add_points('predict -', coord - normal, np.repeat([[255,0,255]], coord.shape[0],axis=0), visible=True)
+            # v.add_points('normal', normal, np.repeat([[255,0,255]], coord.shape[0],axis=0), visible=True)
+            v.add_points('gt', coord+gt, np.repeat([[0,0,255]], coord.shape[0],axis=0), visible=True)
+            v.save(f'visualization/train/eval_{i}')
         #     pred = output.max(1)[1]
         #     label = input_dict["category"]
         #     intersection, union, target = intersection_and_union_gpu(

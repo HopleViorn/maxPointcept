@@ -47,25 +47,21 @@ class Predictor(nn.Module):
         feat_logits = self.backbone(input_dict)
         # print(feat_logits.shape)
         # print(input_dict["normal"].shape)
-        def L1_loss(pred, target):
-            return torch.mean(torch.abs(pred - target))
-        def cosine_simility(pred, target):
-            return torch.mean(torch.nn.functional.cosine_similarity(pred, target, dim=-1))
 
         pred, target = feat_logits, input_dict["normal"]
 
-        l1_loss = L1_loss(pred,target)
-        cos_loss = -cosine_simility(pred,target)
+        l1_loss = torch.mean(torch.abs(target - pred))
+        cos_loss = -torch.nn.functional.cosine_similarity(pred, target, dim=-1)
         # print("l1",l1_loss.shape)
         # print("cos",cos_loss.shape)
 
-        loss = L1_loss(pred,target) + cosine_simility(pred,target)
+        loss = l1_loss
         # print(loss)
         # print(loss.shape)
         if self.training:
             return dict(loss=loss)
         else:
-            return dict(loss = loss, feat_logits=feat_logits, coord = input_dict["coord"])
+            return dict(loss = loss, feat_logits=feat_logits, coord = input_dict["coord"], normal = input_dict["normal"])
 
         # # train
         # if self.training:

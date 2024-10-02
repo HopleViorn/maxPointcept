@@ -47,6 +47,8 @@ hooks = [
 
 test = dict(type="PredictorTester")
 
+gd_size= 0.03
+
 data = dict(
     # num_classes=13,
     # ignore_index=-1,
@@ -90,7 +92,7 @@ data = dict(
             # dict(type="RandomColorDrop", p=0.2, color_augment=0.0),
             dict(
                 type="GridSample",
-                grid_size=0.05,
+                grid_size=gd_size,
                 hash_type="fnv",
                 mode="train",
                 keys=("coord", "normal", "color"),
@@ -111,13 +113,14 @@ data = dict(
     ),
     val=dict(
         type=dataset_type,
-        split="Area_5",
+        split=("test","Area_5"),
+        # split="Area_5",
         data_root=data_root,
         transform=[
             dict(type="CenterShift", apply_z=True),
             dict(
                 type="GridSample",
-                grid_size=0.05,
+                grid_size=gd_size,
                 hash_type="fnv",
                 mode="train",
                 keys=("coord", "normal", "color"),
@@ -143,7 +146,7 @@ data = dict(
         test_cfg=dict(
             voxelize=dict(
                 type="GridSample",
-                grid_size=0.05,
+                grid_size=gd_size,
                 hash_type="fnv",
                 mode="test",
                 keys=("coord", "color"),
