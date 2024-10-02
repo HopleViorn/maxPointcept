@@ -123,7 +123,7 @@ from tqdm import tqdm
 if __name__=='__main__':
 
     num=sys.argv[1]
-    for j in tqdm(range(0, 10)):
+    for j in tqdm(range(0, 50)):
         # point_clouds, instance_labels = save_point_clouds_with_labels_as_numpy()
         dir_path = f"data/cylinders_normal/Area_{int(num)+1}/scene_{j}"
         if not os.path.exists(dir_path):

@@ -55,13 +55,13 @@ class Predictor(nn.Module):
         pred, target = feat_logits, input_dict["normal"]
 
         l1_loss = L1_loss(pred,target)
-        cos_loss = cosine_simility(pred,target)
-        print("l1",l1_loss.shape)
-        print("cos",cos_loss.shape)
+        cos_loss = -cosine_simility(pred,target)
+        # print("l1",l1_loss.shape)
+        # print("cos",cos_loss.shape)
 
         loss = L1_loss(pred,target) + cosine_simility(pred,target)
-        print(loss)
-        print(loss.shape)
+        # print(loss)
+        # print(loss.shape)
         if self.training:
             return dict(loss=loss)
         else:
