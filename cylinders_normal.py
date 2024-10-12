@@ -50,7 +50,7 @@ def generate_random_cylinder_with_points(radius = 1, height = 1, points_density=
     
     return points, normals
 
-def generate_cylinders(num = 10):
+def generate_cylinders(num = 10, factor = 40):
     coords = []
     normals = []
 
@@ -59,7 +59,7 @@ def generate_cylinders(num = 10):
     rr = []
 
     for i in range(num):
-        r = np.random.uniform(0.001, scale/40)
+        r = np.random.uniform(0.001, scale/factor)
         rr.append(r)
         h = np.random.uniform(0.5*scale,scale)
 
@@ -76,7 +76,7 @@ def generate_cylinders(num = 10):
 
     for i in range(int(num/2)):
         indx =np.random.randint(0, num)
-        r = np.random.uniform(0.001, scale/40)
+        r = np.random.uniform(0.001, scale/factor)
         h = np.random.uniform(0.5*scale,scale)
 
         coord, normal = generate_random_cylinder_with_points(r,h)
@@ -90,7 +90,7 @@ def generate_cylinders(num = 10):
 
     for i in range(int(num/2)):
         indx =np.random.randint(0, num)
-        r = np.random.uniform(0.001, scale/40)
+        r = np.random.uniform(0.001, scale/factor)
         h = np.random.uniform(0.5*scale,scale)
 
         coord, normal = generate_random_cylinder_with_points(r,h)
@@ -121,17 +121,39 @@ if __name__=='__main__':
         if not os.path.exists(dir_path):
             os.makedirs(dir_path)
 
-        coord, normal = generate_cylinders(20)
+        coord, normal = generate_cylinders(10)
 
         color = np.ones((coord.shape[0], 3))
+        np.save(os.path.join(dir_path,"color.npy"), color)
+        np.save(os.path.join(dir_path,"coord.npy"), coord)
+        np.save(os.path.join(dir_path,"normal.npy"), normal)
+    
+    for j in tqdm(range(1000, 1500)):
+        # point_clouds, instance_labels = save_point_clouds_with_labels_as_numpy()
+        dir_path = f"data/cylinders_normal/Area_{int(num)+1}/scene_{j}"
+        if not os.path.exists(dir_path):
+            os.makedirs(dir_path)
 
+        coord, normal = generate_cylinders(10,5)
+
+        color = np.ones((coord.shape[0], 3))
+        np.save(os.path.join(dir_path,"color.npy"), color)
+        np.save(os.path.join(dir_path,"coord.npy"), coord)
+        np.save(os.path.join(dir_path,"normal.npy"), normal)
+
+    for j in tqdm(range(1500, 2000)):
+        # point_clouds, instance_labels = save_point_clouds_with_labels_as_numpy()
+        dir_path = f"data/cylinders_normal/Area_{int(num)+1}/scene_{j}"
+        if not os.path.exists(dir_path):
+            os.makedirs(dir_path)
+
+        coord, normal = generate_cylinders(10,160)
+
+        color = np.ones((coord.shape[0], 3))
         np.save(os.path.join(dir_path,"color.npy"), color)
         np.save(os.path.join(dir_path,"coord.npy"), coord)
         np.save(os.path.join(dir_path,"normal.npy"), normal)
         
-        # np.save(os.path.join(dir_path,"instance.npy"), instance)
-        # np.save(os.path.join(dir_path,'normal.npy'), orient)
-        # np.save(os.path.join(dir_path,'segment.npy'),np.ones((point_clouds.shape[0],1)))
 
     coord, normal = generate_cylinders(10)
     v = viz.Visualizer()

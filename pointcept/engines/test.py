@@ -110,6 +110,7 @@ class TesterBase:
     def collate_fn(batch):
         raise collate_fn(batch)
 
+import pyviz3d.visualizer as viz
 @TESTERS.register_module()
 class PredictorTester(TesterBase):
     def test(self):
@@ -125,7 +126,32 @@ class PredictorTester(TesterBase):
 
         save_path = os.path.join(self.cfg.save_path, "result")
         make_dirs(save_path)
-        
+
+        for i, input_dict in enumerate(self.test_loader):
+            input_dict=input_dict[0]
+            print(input_dict.keys())
+            for key in input_dict.keys():
+                if isinstance(input_dict[key], torch.Tensor):
+                    input_dict[key] = input_dict[key].cuda(non_blocking=True)
+            with torch.no_grad():
+                output_dict = self.model(input_dict)
+            normal = output_dict["feat_logits"].detach().cpu().numpy()
+            coord = output_dict["coord"].detach().cpu().numpy()
+            gt = output_dict["normal"].detach().cpu().numpy()
+            # print(normal)
+            # coord = coord - np.mean(coord, axis=0)
+            np.save(os.path.join(save_path, f"test_{i}.npy"), np.hstack([coord, normal]))
+            loss = output_dict["loss"]
+            print(f'loss:{loss}')
+            v = viz.Visualizer()
+            v.add_points('coord', coord)
+            v.add_points('predict +', coord + normal, np.repeat([[255,0,0]], coord.shape[0],axis=0), visible=True)
+            # v.add_points('predict -', coord - normal, np.repeat([[255,0,255]], coord.shape[0],axis=0), visible=True)
+            # v.add_points('normal', normal, np.repeat([[255,0,255]], coord.shape[0],axis=0), visible=True)
+            v.add_points('gt', coord+gt, np.repeat([[0,0,255]], coord.shape[0],axis=0), visible=True)
+            v.save(f'visualization/test/test_{i}')
+        return 
+
         # fragment inference
         for idx, data_dict in enumerate(self.test_loader):
             end = time.time()

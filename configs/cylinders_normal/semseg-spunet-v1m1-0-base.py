@@ -19,7 +19,8 @@ model = dict(
 )
 
 # scheduler settings
-epoch = 3000
+epoch = 300
+eval_epoch = 30
 optimizer = dict(type="SGD", lr=0.1, momentum=0.9, weight_decay=0.0001, nesterov=True)
 scheduler = dict(type="PolyLR")
 
@@ -69,7 +70,7 @@ data = dict(
     # ],
     train=dict(
         type=dataset_type,
-        split=("Area_1", "Area_2", "Area_3", "Area_4", "Area_6"),
+        split=("Area_1", "Area_2", "Area_3", "Area_4","Area_5","Area_6"),
         data_root=data_root,
         transform=[
             dict(type="CenterShift", apply_z=True),
@@ -113,8 +114,8 @@ data = dict(
     ),
     val=dict(
         type=dataset_type,
-        split=("test","Area_5"),
-        # split="Area_5",
+        # split=("test","Area_5"),
+        split="test",
         data_root=data_root,
         transform=[
             dict(type="CenterShift", apply_z=True),
@@ -138,55 +139,27 @@ data = dict(
         test_mode=False,
     ),
     test=dict(
-        type=dataset_type,
-        split="Area_5",
-        data_root=data_root,
-        transform=[dict(type="CenterShift", apply_z=True), dict(type="NormalizeColor")],
-        test_mode=True,
-        test_cfg=dict(
-            voxelize=dict(
-                type="GridSample",
-                grid_size=gd_size,
-                hash_type="fnv",
-                mode="test",
-                keys=("coord", "color"),
-                return_grid_coord=True,
-            ),
-            crop=None,
-            post_transform=[
-                dict(type="CenterShift", apply_z=False),
-                dict(type="ToTensor"),
-                dict(
-                    type="Collect",
-                    keys=("coord", "grid_coord", "index"),
-                    feat_keys=("coord", "color"),
-                ),
-            ],
-            aug_transform=[
-                [dict(type="RandomScale", scale=[0.9, 0.9])],
-                [dict(type="RandomScale", scale=[0.95, 0.95])],
-                [dict(type="RandomScale", scale=[1, 1])],
-                [dict(type="RandomScale", scale=[1.05, 1.05])],
-                [dict(type="RandomScale", scale=[1.1, 1.1])],
-                [
-                    dict(type="RandomScale", scale=[0.9, 0.9]),
-                    dict(type="RandomFlip", p=1),
-                ],
-                [
-                    dict(type="RandomScale", scale=[0.95, 0.95]),
-                    dict(type="RandomFlip", p=1),
-                ],
-                [dict(type="RandomScale", scale=[1, 1]), dict(type="RandomFlip", p=1)],
-                [
-                    dict(type="RandomScale", scale=[1.05, 1.05]),
-                    dict(type="RandomFlip", p=1),
-                ],
-                [
-                    dict(type="RandomScale", scale=[1.1, 1.1]),
-                    dict(type="RandomFlip", p=1),
-                ],
-            ],
-        ),
+        type='S3DISDataset',
+        split='test',
+        data_root='data/cylinders_normal',
+        transform=[
+            dict(type='CenterShift', apply_z=True),
+            dict(
+                type='GridSample',
+                grid_size=0.03,
+                hash_type='fnv',
+                mode='train',
+                keys=('coord', 'normal', 'color'),
+                return_grid_coord=True),
+            dict(type='CenterShift', apply_z=False),
+            dict(type='NormalizeColor'),
+            dict(type='ToTensor'),
+            dict(
+                type='Collect',
+                keys=('coord', 'grid_coord', 'normal', 'color'),
+                feat_keys=['color'])
+        ],
+        test_mode=False
     ),
 )
 

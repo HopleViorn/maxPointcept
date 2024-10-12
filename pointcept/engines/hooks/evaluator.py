@@ -128,7 +128,7 @@ class PredictorEvaluator(HookBase):
             v = viz.Visualizer()
             v.add_points('coord', coord)
             v.add_points('predict +', coord + normal, np.repeat([[255,0,0]], coord.shape[0],axis=0), visible=True)
-            v.add_points('predict -', coord - normal, np.repeat([[255,0,255]], coord.shape[0],axis=0), visible=True)
+            # v.add_points('predict -', coord - normal, np.repeat([[255,0,255]], coord.shape[0],axis=0), visible=True)
             # v.add_points('normal', normal, np.repeat([[255,0,255]], coord.shape[0],axis=0), visible=True)
             v.add_points('gt', coord+gt, np.repeat([[0,0,255]], coord.shape[0],axis=0), visible=True)
             v.save(f'visualization/train/eval_{i}')
