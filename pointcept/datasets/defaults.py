@@ -26,6 +26,7 @@ class DefaultDataset(Dataset):
         "coord",
         "color",
         "normal",
+        "vector_attr_0",
         "strength",
         "segment",
         "instance",
@@ -114,6 +115,8 @@ class DefaultDataset(Dataset):
             data_dict["segment"] = (
                 np.ones(data_dict["coord"].shape[0], dtype=np.int32) * -1
             )
+        if "vector_attr_0" in data_dict.keys():
+            data_dict["vector_attr_0"] = data_dict["vector_attr_0"].astype(np.float32)
 
         if "instance" in data_dict.keys():
             data_dict["instance"] = data_dict["instance"].reshape([-1]).astype(np.int32)

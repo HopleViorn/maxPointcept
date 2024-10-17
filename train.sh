@@ -1,1 +1,1 @@
-sh scripts/train.sh -g 1 -d cylinders_normal -c semseg-spunet-v1m1-0-base -n test
+sh scripts/train.sh -g 1 -d cylinders_normal -c semseg-spunet-v1m1-0-base -n nuclear_validate

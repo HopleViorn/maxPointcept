@@ -239,6 +239,8 @@ class RandomDropout(object):
                 data_dict["color"] = data_dict["color"][idx]
             if "normal" in data_dict.keys():
                 data_dict["normal"] = data_dict["normal"][idx]
+            if "vector_attr_0" in data_dict.keys():
+                data_dict["vector_attr_0"] = data_dict["vector_attr_0"][idx]
             if "strength" in data_dict.keys():
                 data_dict["strength"] = data_dict["strength"][idx]
             if "segment" in data_dict.keys():
@@ -282,6 +284,9 @@ class RandomRotate(object):
             data_dict["coord"] += center
         if "normal" in data_dict.keys():
             data_dict["normal"] = np.dot(data_dict["normal"], np.transpose(rot_t))
+        if "vector_attr_0" in data_dict.keys():
+            data_dict["vector_attr_0"] = np.dot(data_dict["vector_attr_0"], np.transpose(rot_t))
+
         return data_dict
 
 
@@ -321,6 +326,8 @@ class RandomRotateTargetAngle(object):
             data_dict["coord"] += center
         if "normal" in data_dict.keys():
             data_dict["normal"] = np.dot(data_dict["normal"], np.transpose(rot_t))
+        if "vector_attr_0" in data_dict.keys():
+            data_dict["vector_attr_0"] = np.dot(data_dict["vector_attr_0"], np.transpose(rot_t))
         return data_dict
 
 
@@ -350,11 +357,15 @@ class RandomFlip(object):
                 data_dict["coord"][:, 0] = -data_dict["coord"][:, 0]
             if "normal" in data_dict.keys():
                 data_dict["normal"][:, 0] = -data_dict["normal"][:, 0]
+            if "vector_attr_0" in data_dict.keys():
+                data_dict["vector_attr_0"][:, 0] = -data_dict["vector_attr_0"][:, 0]
         if np.random.rand() < self.p:
             if "coord" in data_dict.keys():
                 data_dict["coord"][:, 1] = -data_dict["coord"][:, 1]
             if "normal" in data_dict.keys():
                 data_dict["normal"][:, 1] = -data_dict["normal"][:, 1]
+            if "vector_attr_0" in data_dict.keys():
+                data_dict["vector_attr_0"][:, 1] = -data_dict["vector_attr_0"][:, 1]
         return data_dict
 
 
@@ -990,6 +1001,8 @@ class SphereCrop(object):
                         data_crop_dict["grid_coord"] = data_dict["grid_coord"][idx_crop]
                     if "normal" in data_dict.keys():
                         data_crop_dict["normal"] = data_dict["normal"][idx_crop]
+                    if "vector_attr_0" in data_dict.keys():
+                        data_crop_dict["vector_attr_0"] = data_dict["vector_attr_0"][idx_crop]
                     if "color" in data_dict.keys():
                         data_crop_dict["color"] = data_dict["color"][idx_crop]
                     if "displacement" in data_dict.keys():
@@ -1038,6 +1051,8 @@ class SphereCrop(object):
                 data_dict["color"] = data_dict["color"][idx_crop]
             if "normal" in data_dict.keys():
                 data_dict["normal"] = data_dict["normal"][idx_crop]
+            if "vector_attr_0" in data_dict.keys():
+                data_dict["vector_attr_0"] = data_dict["vector_attr_0"][idx_crop]
             if "segment" in data_dict.keys():
                 data_dict["segment"] = data_dict["segment"][idx_crop]
             if "instance" in data_dict.keys():
@@ -1065,6 +1080,8 @@ class ShufflePoint(object):
             data_dict["color"] = data_dict["color"][shuffle_index]
         if "normal" in data_dict.keys():
             data_dict["normal"] = data_dict["normal"][shuffle_index]
+        if "vector_attr_0" in data_dict.keys():
+            data_dict["vector_attr_0"] = data_dict["vector_attr_0"][shuffle_index]
         if "segment" in data_dict.keys():
             data_dict["segment"] = data_dict["segment"][shuffle_index]
         if "instance" in data_dict.keys():
@@ -1086,6 +1103,8 @@ class CropBoundary(object):
             data_dict["color"] = data_dict["color"][mask]
         if "normal" in data_dict.keys():
             data_dict["normal"] = data_dict["normal"][mask]
+        if "vector_attr_0" in data_dict.keys():
+            data_dict["vector_attr_0"] = data_dict["vector_attr_0"][mask]
         if "segment" in data_dict.keys():
             data_dict["segment"] = data_dict["segment"][mask]
         if "instance" in data_dict.keys():

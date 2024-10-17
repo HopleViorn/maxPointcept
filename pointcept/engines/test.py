@@ -135,7 +135,9 @@ class PredictorTester(TesterBase):
                     input_dict[key] = input_dict[key].cuda(non_blocking=True)
             with torch.no_grad():
                 output_dict = self.model(input_dict)
-            normal = output_dict["feat_logits"].detach().cpu().numpy()
+            feat_logits = output_dict["feat_logits"].detach().cpu().numpy()
+            normal = feat_logits[:, :3]
+            towards = feat_logits[:, 3:]
             coord = output_dict["coord"].detach().cpu().numpy()
             gt = output_dict["normal"].detach().cpu().numpy()
             # print(normal)

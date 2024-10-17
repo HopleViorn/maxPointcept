@@ -1,3 +1,4 @@
+from turtle import towards
 import torch.nn as nn
 import torch_scatter
 
@@ -75,6 +76,92 @@ class Predictor(nn.Module):
         # else:
         #     return dict(seg_logits=seg_logits)
 
+@MODELS.register_module()
+class Predictor_6(nn.Module):
+    def __init__(self, backbone=None, criteria=None):
+        super().__init__()
+        self.backbone = build_model(backbone)
+        # self.criteria = build_criteria(criteria)
+
+    def forward(self, input_dict):
+        if "condition" in input_dict.keys():
+            # PPT (https://arxiv.org/abs/2308.09718)
+            # currently, only support one batch one condition
+            input_dict["condition"] = input_dict["condition"][0]
+        feat_logits = self.backbone(input_dict)
+
+        centroid = feat_logits[:,:3]
+        towards = feat_logits[:,3:]
+
+        centroid_gt = input_dict["normal"]
+        towards_gt = input_dict["vector_attr_0"]
+
+
+        # centroid = torch.nn.functional.normalize(centroid, dim=1)
+        # centroid_gt = torch.nn.functional.normalize(centroid_gt, dim=1)
+        
+        # centroid_loss = torch.mean(torch.abs(centroid_gt - centroid)/(centroid_gt.norm(dim=1,keepdim=True) + 1e-6))
+        centroid_loss = torch.mean(torch.abs(centroid_gt - centroid))
+        # centroid_loss = centroid_loss / torch.mean(centroid_gt.norm(dim=1) + 1e-6)
+        # towards[towards[:,2]<0] *= -1
+
+        # v = torch.Tensor([1.0, 1.0, 1.0]).cuda()
+        # dot_product = torch.matmul(towards, v)
+        cond = torch.sum(towards, dim=1)
+        towards[cond < 0] *=-1
+        towards_loss = torch.mean(torch.abs(towards_gt - towards))
+
+        # towards_loss = (-torch.mean(torch.nn.functional.cosine_similarity(towards_gt, towards, dim=-1)) + torch.mean(torch.abs(towards_gt - towards)))/2
+        # loss = centroid_loss * 5 + towards_loss
+        loss = centroid_loss
+
+        if self.training:
+            return dict(loss=loss)
+        else:
+            return dict(loss = loss, feat_logits=feat_logits, coord = input_dict["coord"], normal = input_dict["normal"])
+        
+@MODELS.register_module()
+class Predictor_6_towards(nn.Module):
+    def __init__(self, backbone=None, criteria=None):
+        super().__init__()
+        self.backbone = build_model(backbone)
+        # self.criteria = build_criteria(criteria)
+
+    def forward(self, input_dict):
+        if "condition" in input_dict.keys():
+            # PPT (https://arxiv.org/abs/2308.09718)
+            # currently, only support one batch one condition
+            input_dict["condition"] = input_dict["condition"][0]
+        feat_logits = self.backbone(input_dict)
+
+        centroid = feat_logits[:,:3]
+        towards = feat_logits[:,3:]
+
+        centroid_gt = input_dict["normal"]
+        towards_gt = input_dict["vector_attr_0"]
+
+
+        # centroid = torch.nn.functional.normalize(centroid, dim=1)
+        # centroid_gt = torch.nn.functional.normalize(centroid_gt, dim=1)
+        
+        # centroid_loss = torch.mean(torch.abs(centroid_gt - centroid)/(centroid_gt.norm(dim=1,keepdim=True) + 1e-6))
+        centroid_loss = torch.mean(torch.abs(centroid_gt - centroid))
+        centroid_loss = centroid_loss / torch.mean(centroid_gt.norm(dim=1) + 1e-6)
+        # towards[towards[:,2]<0] *= -1
+
+        # v = torch.Tensor([1.0, 1.0, 1.0]).cuda()
+        # dot_product = torch.matmul(towards, v)
+        cond = torch.sum(towards, dim=1)
+        towards[cond < 0] *=-1
+        towards_loss = torch.mean(torch.abs(towards_gt - towards))
+
+        # towards_loss = (-torch.mean(torch.nn.functional.cosine_similarity(towards_gt, towards, dim=-1)) + torch.mean(torch.abs(towards_gt - towards)))/2
+        loss = centroid_loss + towards_loss
+
+        if self.training:
+            return dict(loss=loss)
+        else:
+            return dict(loss = loss, feat_logits=feat_logits, coord = input_dict["coord"], normal = input_dict["normal"])
 
 @MODELS.register_module()
 class DefaultSegmentorV2(nn.Module):
