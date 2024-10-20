@@ -158,20 +158,26 @@ class PredictorEvaluator_6(HookBase):
             feat_logits = output_dict["feat_logits"].detach().cpu().numpy()
             normal = feat_logits[:,:3]
             towards = feat_logits[:,3:]
-            # towards = towards / np.linalg.norm(towards, axis=1, keepdims=True)
+            towards = towards / np.linalg.norm(towards, axis=1, keepdims=True)
+
+            towards[np.sum(towards, axis=1) < 0] *=1
+            # towards = towards/towards.norm(dim=1, keepdim=True)
+            t_colors = (towards+1)*127.5
 
             coord = output_dict["coord"].detach().cpu().numpy()
             gt = output_dict["normal"].detach().cpu().numpy()
             loss = output_dict["loss"]
             print(f'loss:{loss}')
             v = viz.Visualizer()
-            v.add_points('coord', coord)
+            v.add_points('coord', coord, t_colors)
             v.add_points('predict +', coord + normal, np.repeat([[255,0,0]], coord.shape[0],axis=0), visible=True)
-            v.add_lines('axis',coord, coord + towards, np.repeat([[0,255,0]], coord.shape[0],axis=0), visible=True)
+            v.add_points('supplement', coord + 2*normal, np.repeat([[0,0,0]], coord.shape[0],axis=0), visible=False)
+            # v.add_points('predict +', coord + normal, towards * 255, visible=True)
+            v.add_lines('axis',coord, coord + towards, np.repeat([[0,255,0]], coord.shape[0],axis=0), visible=False)
             v.add_points('gt', coord+gt, np.repeat([[0,0,255]], coord.shape[0],axis=0), visible=True)
             # v.save(f'visualization/train/e    val_{i}')
             # v.save(f'visualization/train_45_with_ori/eval_{i}')
-            v.save(f'visualization/train_45/eval_{i}')
+            v.save(f'visualization/train_small/eval_{i}')
         self.trainer.logger.info("<<<<<<<<<<<<<<<<< End Evaluation <<<<<<<<<<<<<<<<<")
         self.trainer.comm_info["current_metric_value"] = 233  # save for saver
         self.trainer.comm_info["current_metric_name"] = "233"  # save for saver

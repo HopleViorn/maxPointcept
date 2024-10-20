@@ -412,17 +412,14 @@ class SpUNetMLP(nn.Module):
         final_in_channels = (
             channels[-1] if not self.cls_mode else channels[self.num_stages - 1]
         )
-        self.final = spconv.Identity()
-        self.cls_head = nn.Sequential(
-            nn.Linear(final_in_channels, 256),
-            nn.BatchNorm1d(256),
-            nn.Sigmoid(),
-            nn.Dropout(p=0.5),
-            nn.Linear(256, 128),
-            nn.BatchNorm1d(128),
-            nn.Sigmoid(),
-            nn.Dropout(p=0.5),
-            nn.Linear(128, self.num_classes),
+        self.fc_0 = spconv.SubMConv3d(
+            final_in_channels, 128, kernel_size=1, padding=1, bias=True
+        )
+        self.fc_1 = spconv.SubMConv3d(
+            128, 96, kernel_size=1, padding=1, bias=True
+        )
+        self.fc_2 = spconv.SubMConv3d(
+            96, num_classes, kernel_size=1, padding=1, bias=True
         )
         self.apply(self._init_weights)
 
@@ -471,9 +468,10 @@ class SpUNetMLP(nn.Module):
                 x = x.replace_feature(torch.cat((x.features, skip.features), dim=1))
                 x = self.dec[s](x)
 
-        x = self.final(x).features
-        x = self.cls_head(x)
-        return x
+        y = self.fc_0(x)
+        y = self.fc_1(y)
+        y = self.fc_2(y)
+        return y.features
 
 
 @MODELS.register_module()

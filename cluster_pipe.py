@@ -5,6 +5,7 @@ from glob import glob
 import os
 from knn import KNN
 from tqdm import tqdm
+import pyviz3d.visualizer as viz
 
 
 COLOR_MAP = {
@@ -56,11 +57,17 @@ def save_pcd(xyz, colors, normals, instance, save_path):
     pcd.point['colors'] = o3d.core.Tensor(colors, dtype=o3d.core.Dtype.Float32)
     pcd.point['normals'] = o3d.core.Tensor(normals, dtype=o3d.core.Dtype.Float32)
     pcd.point['instances'] = o3d.core.Tensor(instance.reshape(-1,1), dtype=o3d.core.Dtype.Int32)
-
     o3d.t.io.write_point_cloud(save_path, pcd)
 
+def save_npy(coord, color, feat, instance, save_path):
+    v = viz.Visualizer()
+    v.add_points('coord', coord, color)
+    v.add_points('centroid', feat[:, :3], (feat[:, 3:6]+1)*127.5)
+    v.save(os.path.join(save_path, f'vis_{i}'))
+
+
 if __name__=="__main__":
-    res_dir = "exp/cylinders_normal/test/result"
+    res_dir = "exp/cylinders_normal/small_ct/result"
     fns = sorted(glob(os.path.join(res_dir, "*.npy")))
 
     cnt = 1
@@ -68,9 +75,10 @@ if __name__=="__main__":
     os.makedirs(save_dir, exist_ok=True)
     for i, fn in tqdm(enumerate(fns)):
         data = np.load(fn)
-        coords, normals = data[:, :3], data[:, 3:]
-        hdbscan = HDBSCAN(min_cluster_size=100, min_samples=5, cluster_selection_epsilon=0.02)
-        hdbscan.fit(coords + normals)
+        # coords, normals, axis  = data[:, :3], data[:, 3:6], data[:, 6:9]
+        coords, feat = data[:, :3], data[:, 3:9]
+        hdbscan = HDBSCAN(min_cluster_size=15, min_samples=5, cluster_selection_epsilon=0.02)
+        hdbscan.fit(feat)
         clabel = hdbscan.labels_
         if np.all(clabel == -1):
             clabel[:] = 0
@@ -91,7 +99,9 @@ if __name__=="__main__":
             if ins == -1:
                 colors[mask] = [0, 0, 0]
             colors[mask] = np.array(COLOR_MAP[j % 38])
-        save_pcd(coords, colors / 255.0, normals, clabel, os.path.join(save_dir, f"res_{i:02d}.pcd"))
+        save_npy(coords, colors, feat, clabel, save_dir)
+        # save_pcd(coords, colors / 255.0, normals, clabel, os.path.join(save_dir, f"res_{i:02d}.pcd"))
+
 
 
 

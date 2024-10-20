@@ -347,6 +347,61 @@ class PredictorTester(TesterBase):
         return batch
 
 @TESTERS.register_module()
+class PredictorTester_6(TesterBase):
+    def test(self):
+        assert self.test_loader.batch_size == 1
+        logger = get_root_logger()
+        logger.info(">>>>>>>>>>>>>>>> Start Test >>>>>>>>>>>>>>>>")
+
+        batch_time = AverageMeter()
+        intersection_meter = AverageMeter()
+        union_meter = AverageMeter()
+        target_meter = AverageMeter()
+        self.model.eval()
+
+        save_path = os.path.join(self.cfg.save_path, "result")
+        make_dirs(save_path)
+
+        for i, input_dict in enumerate(self.test_loader):
+            input_dict=input_dict[0]
+            print(input_dict.keys())
+            for key in input_dict.keys():
+                if isinstance(input_dict[key], torch.Tensor):
+                    input_dict[key] = input_dict[key].cuda(non_blocking=True)
+            with torch.no_grad():
+                output_dict = self.model(input_dict)
+                
+            feat_logits = output_dict["feat_logits"].detach().cpu().numpy()
+            normal = feat_logits[:,:3]
+            towards = feat_logits[:,3:]
+            towards = towards / np.linalg.norm(towards, axis=1, keepdims=True)
+
+            towards[np.sum(towards, axis=1) < 0] *=1
+            # towards = towards/towards.norm(dim=1, keepdim=True)
+            t_colors = (towards+1)*127.5
+
+            coord = output_dict["coord"].detach().cpu().numpy()
+            gt = output_dict["normal"].detach().cpu().numpy()
+            loss = output_dict["loss"]
+            print(f'loss:{loss}')
+            v = viz.Visualizer()
+            v.add_points('coord', coord, t_colors)
+            v.add_points('predict +', coord + normal, np.repeat([[255,0,0]], coord.shape[0],axis=0), visible=True)
+            v.add_points('supplement', coord + 2*normal, np.repeat([[0,0,0]], coord.shape[0],axis=0), visible=False)
+            # v.add_points('predict +', coord + normal, towards * 255, visible=True)
+            v.add_lines('axis',coord, coord + towards, np.repeat([[0,255,0]], coord.shape[0],axis=0), visible=False)
+            v.add_points('gt', coord+gt, np.repeat([[0,0,255]], coord.shape[0],axis=0), visible=False)
+            v.save(f'visualization/tester_res/eval_{i}')
+
+            save_file = np.hstack([coord, coord+normal, towards])
+            np.save(os.path.join(save_path, f"test_{i}.npy"), save_file)
+
+
+    @staticmethod
+    def collate_fn(batch):
+        return batch
+
+@TESTERS.register_module()
 class SemSegTester(TesterBase):
     def test(self):
         assert self.test_loader.batch_size == 1

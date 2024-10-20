@@ -107,13 +107,17 @@ class Predictor_6(nn.Module):
 
         # v = torch.Tensor([1.0, 1.0, 1.0]).cuda()
         # dot_product = torch.matmul(towards, v)
-        cond = torch.sum(towards, dim=1)
-        towards[cond < 0] *=-1
+        # cond = torch.sum(towards, dim=1)
+        # towards[cond < 0] *=-1
+        towards = towards/towards.norm(dim=1, keepdim=True)
         towards_loss = torch.mean(torch.abs(towards_gt - towards))
+        towards_cos_loss = -torch.mean(torch.abs(torch.nn.functional.cosine_similarity(towards_gt, towards, dim=1)))
 
         # towards_loss = (-torch.mean(torch.nn.functional.cosine_similarity(towards_gt, towards, dim=-1)) + torch.mean(torch.abs(towards_gt - towards)))/2
         # loss = centroid_loss * 5 + towards_loss
-        loss = centroid_loss
+        loss = 0.25*towards_cos_loss + 0.75*centroid_loss
+        # loss = centroid_loss
+        # loss = towards_cos_loss + centroid_loss
 
         if self.training:
             return dict(loss=loss)

@@ -1,1 +1,1 @@
-sh scripts/test.sh -p python -d cylinders_normal -n test -w model_last
+sh scripts/test.sh -p python -d cylinders_normal -n small_ct -w model_last

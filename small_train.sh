@@ -1,0 +1,1 @@
+sh scripts/train.sh -g 1 -d cylinders_normal -c ct_small -n small_ct

@@ -4,7 +4,7 @@ import pyviz3d.visualizer as viz
 scale = 5
 
 def generate_random_translation_rotation_matrix():
-    translation = np.random.uniform(-scale/3, scale/3, size=3)
+    translation = np.random.uniform(-scale/2, scale/2, size=3)
     
     angles = np.random.uniform(0, 2 * np.pi, size=3)  # Random angles for rotation around x, y, and z axes
     Rx = np.array([[1, 0, 0],
@@ -120,9 +120,10 @@ def generate_cylinders(num = 10, factor = 40):
     coords = np.concatenate(coords, axis=0)
     normals = np.concatenate(normals, axis=0)
     towards = np.concatenate(towards, axis=0)
-    v = np.array([1, 1, 1])
-    dot_product = np.dot(towards, v)
-    towards[dot_product < 0] *=-1
+    # v = np.array([1, 1, 1])
+    # dot_product = np.dot(towards, v)
+    cond = np.sum(towards, axis=1)
+    towards[cond < 0] *=-1
 
     return coords, normals, towards
 
@@ -138,21 +139,13 @@ if __name__=='__main__':
         if not os.path.exists(dir_path):
             os.makedirs(dir_path)
 
-        coord, normal, towards = generate_cylinders(10)
+        coord_0, normal_0, towards_0 = generate_cylinders(17,40)
+        coord_1, normal_1, towards_1 = generate_cylinders(3,8)
+        coord_2, normal_2, towards_2 = generate_cylinders(5,160)
 
-        color = np.ones((coord.shape[0], 3))
-        np.save(os.path.join(dir_path,"color.npy"), color)
-        np.save(os.path.join(dir_path,"coord.npy"), coord)
-        np.save(os.path.join(dir_path,"normal.npy"), normal)
-        np.save(os.path.join(dir_path,"vector_attr_0.npy"), towards)
-    
-    for j in tqdm(range(10*factor, 15*factor)):
-        # point_clouds, instance_labels = save_point_clouds_with_labels_as_numpy()
-        dir_path = f"data/cylinders_normal/Area_{int(num)+1}/scene_{j}"
-        if not os.path.exists(dir_path):
-            os.makedirs(dir_path)
-
-        coord, normal, towards = generate_cylinders(10,5)
+        coord = np.concatenate([coord_0, coord_1, coord_2], axis=0)
+        normal = np.concatenate([normal_0, normal_1, normal_2], axis=0)
+        towards = np.concatenate([towards_0, towards_1, towards_2], axis=0)
 
         color = np.ones((coord.shape[0], 3))
         np.save(os.path.join(dir_path,"color.npy"), color)
@@ -160,35 +153,15 @@ if __name__=='__main__':
         np.save(os.path.join(dir_path,"normal.npy"), normal)
         np.save(os.path.join(dir_path,"vector_attr_0.npy"), towards)
 
-    for j in tqdm(range(15*factor, 20*factor)):
-        # point_clouds, instance_labels = save_point_clouds_with_labels_as_numpy()
-        dir_path = f"data/cylinders_normal/Area_{int(num)+1}/scene_{j}"
-        if not os.path.exists(dir_path):
-            os.makedirs(dir_path)
+    coord_0, normal_0, towards_0 = generate_cylinders(15,40)
+    coord_0, normal_0, towards_0 = generate_cylinders(5,80)
+    coord_1, normal_1, towards_1 = generate_cylinders(3,10)
+    coord_2, normal_2, towards_2 = generate_cylinders(5,160)
 
-        coord, normal, towards = generate_cylinders(10,160)
+    coord = np.concatenate([coord_0, coord_1, coord_2], axis=0)
+    normal = np.concatenate([normal_0, normal_1, normal_2], axis=0)
+    towards = np.concatenate([towards_0, towards_1, towards_2], axis=0)
 
-        color = np.ones((coord.shape[0], 3))
-        np.save(os.path.join(dir_path,"color.npy"), color)
-        np.save(os.path.join(dir_path,"coord.npy"), coord)
-        np.save(os.path.join(dir_path,"normal.npy"), normal)
-        np.save(os.path.join(dir_path,"vector_attr_0.npy"), towards)
-    
-    # for j in tqdm(range(20*factor, 30*factor)):
-    #     # point_clouds, instance_labels = save_point_clouds_with_labels_as_numpy()
-    #     dir_path = f"data/cylinders_normal/Area_{int(num)+1}/scene_{j}"
-    #     if not os.path.exists(dir_path):
-    #         os.makedirs(dir_path)
-
-    #     coord, normal, towards = generate_cylinders(10,300)
-
-    #     color = np.ones((coord.shape[0], 3))
-    #     np.save(os.path.join(dir_path,"color.npy"), color)
-    #     np.save(os.path.join(dir_path,"coord.npy"), coord)
-    #     np.save(os.path.join(dir_path,"normal.npy"), normal)
-    #     np.save(os.path.join(dir_path,"vector_attr_0.npy"), towards)
-
-    coord, normal, towards = generate_cylinders(10)
     v = viz.Visualizer()
     v.add_points('RGB Color', coord, normal)
     v.add_lines('Normals', coord, coord + normal, visible=True)
